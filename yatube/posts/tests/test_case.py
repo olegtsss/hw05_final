@@ -8,7 +8,6 @@ from django.urls import reverse
 
 from posts.models import Group, Post, User
 
-# TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=f'{settings.BASE_DIR}/TEMP')
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
