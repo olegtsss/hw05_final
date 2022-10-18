@@ -84,9 +84,10 @@ def follow_index(request):
     follows = Follow.objects.filter(user=request.user)
     posts = []
     for follow in follows:
-        posts = Post.objects.select_related(
+        for post in Post.objects.select_related(
             'author', 'group'
-        ).filter(author=follow.author)
+        ).filter(author=follow.author):
+            posts.append(post)
     context = {
         'page_obj': paginator_render_page(posts, request),
         'follow': True
@@ -97,7 +98,12 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     profile_user = get_object_or_404(User, username=username)
-    Follow.objects.create(user=request.user, author=profile_user)
+    if (
+        request.user != profile_user
+        and len(Follow.objects.filter(
+            user=request.user).filter(author=profile_user)) == 0
+    ):
+        Follow.objects.create(user=request.user, author=profile_user)
     return(render_profile(request, profile_user))
 
 
