@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.test import override_settings
 from django.urls import reverse
 
-from posts.models import Comment, Follow, Post, User
+from posts.models import Comment, Follow, Post
 from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
 
