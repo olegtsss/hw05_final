@@ -36,9 +36,11 @@ def post_detail(request, post_id):
         {
             'post': get_object_or_404(Post, id=post_id),
             'new_comment_form': CommentForm(),
-            'comments': Comment.objects.select_related(
-                'author', 'post'
-            ).filter(post=post_id)
+            'page_obj': paginator_render_page(
+                Comment.objects.select_related(
+                    'author', 'post'
+                ).filter(post=post_id), request
+            )
         }
     )
 

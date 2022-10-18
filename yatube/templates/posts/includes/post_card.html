@@ -18,6 +18,7 @@
   <p>{{ post.text|linebreaksbr }}</p>
   <a href="{% url 'posts:post_detail' post.id %}">Подробная информация</a>
   {% if not not_render_href_to_group_list and post.group %}
+    <br>  
     <a href="{% url 'posts:group_posts' post.group.slug %}">#{{ post.group }}</a>
   {% endif %}
 </article>
