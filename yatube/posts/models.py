@@ -100,12 +100,10 @@ class Follow(models.Model):
     class Meta:
         verbose_name = "подписку"
         verbose_name_plural = "Подписки на портале"
+        unique_together = [["user", "author"]]
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(
-                    user=models.F('author')
-                ), name='user_cannot_follow_himself'
+                check=~models.Q(user=models.F("author")),
+                name="user is not author",
             ),
-            models.UniqueConstraint(
-                fields=['user', 'author'], name='unique_following')
         ]
