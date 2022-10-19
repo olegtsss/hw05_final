@@ -31,7 +31,8 @@ def render_profile(request, profile_user):
     return render(request, 'posts/profile.html', {
         'author': profile_user,
         'page_obj': paginator_render_page(
-            profile_user.posts.select_related('group').all(), request
+            profile_user.
+            posts_post_related.select_related('group').all(), request
         ),
         'following': following,
         'render_button_following': render_button_following

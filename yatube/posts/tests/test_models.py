@@ -1,6 +1,7 @@
+from core.models import LENGTH_TEXT
 from django.test import override_settings
 
-from posts.models import LENGTH_TEXT, Post
+from posts.models import Post
 from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
 

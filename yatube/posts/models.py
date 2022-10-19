@@ -1,11 +1,6 @@
-from core.models import CreatedModel
+from core.models import CreatedModel, User
 
-from django.contrib.auth import get_user_model
 from django.db import models
-
-
-User = get_user_model()
-LENGTH_TEXT = 15
 
 
 class Group(models.Model):
@@ -22,16 +17,6 @@ class Group(models.Model):
 
 
 class Post(CreatedModel):
-    text = models.TextField(
-        'Текст',
-        help_text='Введите текст поста'
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='posts',
-        verbose_name='Автор'
-    )
     group = models.ForeignKey(
         Group,
         blank=True,
@@ -47,13 +32,9 @@ class Post(CreatedModel):
         blank=True
     )
 
-    class Meta:
-        ordering = ('-pub_date',)
+    class Meta(CreatedModel.Meta):
         verbose_name = "пост"
         verbose_name_plural = "Посты на портале"
-
-    def __str__(self):
-        return self.text[0:LENGTH_TEXT]
 
 
 class Comment(CreatedModel):
@@ -63,25 +44,11 @@ class Comment(CreatedModel):
         related_name='comments',
         verbose_name='Комментируемый пост'
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор'
-    )
-    text = models.TextField(
-        'Комментарий',
-        max_length=400,
-        help_text='Введите комментарий'
-    )
 
-    class Meta:
+    class Meta(CreatedModel.Meta):
         ordering = ('-id',)
         verbose_name = "комментарий"
         verbose_name_plural = "Комментарии на портале"
-
-    def __str__(self):
-        return self.text[0:LENGTH_TEXT]
 
 
 class Follow(models.Model):
