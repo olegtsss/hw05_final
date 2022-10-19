@@ -84,24 +84,18 @@ class PostFormTests(BaseCaseForTests):
 
     def test_auth_user_can_comment_post(self):
         """
-        Проверка, что авторизованный пользователь
-        может комментировать пост
+        Проверка, что авторизованный пользователь может комментировать пост
         """
         before_comments = set(Comment.objects.all())
-        self.another.post(
-            self.POST_COMMENT,
-            data={'text': 'Тестовый комментарий'}
-        )
+        new_text_comment = {'text': 'Тестовый комментарий'}
+        self.another.post(self.POST_COMMENT, data=new_text_comment)
         after_comments = set(Comment.objects.all())
         added_comments_set = after_comments - before_comments
         self.assertEqual(len(added_comments_set), 1)
         comment = added_comments_set.pop()
-        response_comment = self.guest.post(
-            self.POST_DETAIL_URL
-        ).context['page_obj'][0]
-        self.assertTrue(comment.post, response_comment.post)
-        self.assertTrue(comment.author, response_comment.author)
-        self.assertTrue(comment.text, response_comment.text)
+        self.assertEqual(comment.post, self.post)
+        self.assertEqual(comment.author, self.user_another)
+        self.assertEqual(comment.text, new_text_comment['text'])
 
     def test_not_auth_user_cannot_comment_post(self):
         """

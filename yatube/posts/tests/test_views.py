@@ -15,6 +15,7 @@ class PostPagesTests(BaseCaseForTests):
         cls.POST_URL = reverse(
             'posts:post_detail', args=[cls.post.id]
         )
+        Follow.objects.create(user=cls.user_another, author=cls.user)
 
     def test_contexts(self):
         """Проверка контекстов приложения posts"""
@@ -22,12 +23,13 @@ class PostPagesTests(BaseCaseForTests):
             self.MAIN_PAGE_URL,
             self.GROUP_POSTS_URL,
             self.PROFILE_URL,
-            self.POST_URL
+            self.POST_URL,
+            self.FOLLOW_MAIN_PAGE_URL
         ]
         for url in case:
             with self.subTest(address=url):
-                if url != self.POST_URL:
-                    posts = self.guest.get(url).context['page_obj']
+                if url == self.FOLLOW_MAIN_PAGE_URL or url != self.POST_URL:
+                    posts = self.another.get(url).context['page_obj']
                     self.assertEqual(len(posts.object_list), 1)
                     post = posts[0]
                 else:
@@ -59,7 +61,11 @@ class PostPagesTests(BaseCaseForTests):
             [self.GROUP_POSTS_URL, settings.COUNT_OBJECTS_IN_PAGE],
             [f'{self.GROUP_POSTS_URL}?page=2', 1],
             [self.PROFILE_URL, settings.COUNT_OBJECTS_IN_PAGE],
-            [f'{self.PROFILE_URL}?page=2', 1]
+            [f'{self.PROFILE_URL}?page=2', 1],
+            [self.PROFILE_URL, settings.COUNT_OBJECTS_IN_PAGE],
+            [f'{self.PROFILE_URL}?page=2', 1],
+            [self.FOLLOW_MAIN_PAGE_URL, settings.COUNT_OBJECTS_IN_PAGE],
+            [f'{self.FOLLOW_MAIN_PAGE_URL}?page=2', 1]
         ]
         Post.objects.bulk_create(
             Post(
@@ -71,15 +77,8 @@ class PostPagesTests(BaseCaseForTests):
         )
         for url, expected in cases:
             with self.subTest(address=url):
-                response = self.guest.get(url)
+                response = self.another.get(url)
                 self.assertEqual(len(response.context['page_obj']), expected)
-
-    def test_another_group_without_test_post(self):
-        """Проверка, что пост не попал в чужую групп-ленту"""
-        posts = self.guest.get(
-            self.ANOTHER_GROUP_POSTS_URL
-        ).context['page_obj']
-        self.assertIsNot(self.post, posts)
 
     def test_index_page_cashe(self):
         """Проверка работы кэша для списка постов"""
@@ -93,32 +92,30 @@ class PostPagesTests(BaseCaseForTests):
             page, self.guest.get(self.MAIN_PAGE_URL).content
         )
 
-    def test_user_can_follow_unfollow_to_another_authors(self):
+    def test_user_can_follow_to_another_authors(self):
         """
-        Авторизованный пользователь может подписываться
-        на других пользователей и отписываться от них
+        Авторизованный пользователь может подписываться на других пользователей
         """
-        before_follows = set(Follow.objects.all())
-        self.another.get(self.FOLLOW_URL)
-        after_follows = set(Follow.objects.all())
-        added_follows = after_follows - before_follows
-        self.assertEqual(len(added_follows), 1)
-        follow = added_follows.pop()
-        self.assertEqual(follow.user, self.user_another)
-        self.assertEqual(follow.author, self.user)
+        self.third.get(self.FOLLOW_URL)
+        self.assertTrue(
+            Follow.objects.
+            filter(user=self.user_third).
+            filter(author=self.user)
+        )
+
+    def test_user_can_unfollow_to_another_authors(self):
+        """
+        Авторизованный пользователь может отписываться от других пользователей
+        """
         self.another.get(self.UNFOLLOW_URL)
-        after_unfollow = set(Follow.objects.all())
-        new_follows = after_unfollow - after_follows
-        self.assertEqual(len(new_follows), 0)
+        self.assertFalse(
+            Follow.objects.
+            filter(user=self.user_another).
+            filter(author=self.user)
+        )
 
     def test_new_post_on_page_follower(self):
-        self.another.get(self.FOLLOW_URL)
-        self.assertIn(
-            self.post,
-            self.another.get(
-                self.FOLLOW_MAIN_PAGE_URL
-            ).context['page_obj'].object_list
-        )
+        """На странице подписок появляется новый пост"""
         new_post = Post.objects.create(
             text='Второй пост.',
             author=self.user,
@@ -130,9 +127,14 @@ class PostPagesTests(BaseCaseForTests):
                 self.FOLLOW_MAIN_PAGE_URL
             ).context['page_obj'].object_list
         )
-        self.assertNotIn(
-            new_post,
-            self.third.get(
-                self.FOLLOW_MAIN_PAGE_URL
-            ).context['page_obj'].object_list
-        )
+
+    def test_another_group_without_test_post(self):
+        """Проверка, что пост не попал в чужие групп-ленты"""
+        case = [
+            self.ANOTHER_GROUP_POSTS_URL,
+            self.FOLLOW_MAIN_PAGE_URL
+        ]
+        for url in case:
+            with self.subTest(address=url):
+                posts = self.third.get(url).context['page_obj'].object_list
+                self.assertIsNot(self.post, posts)
