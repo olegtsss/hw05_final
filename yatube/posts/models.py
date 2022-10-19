@@ -9,8 +9,8 @@ class Group(models.Model):
     description = models.TextField('Описание',)
 
     class Meta:
-        verbose_name = "группу"
-        verbose_name_plural = "Группы на портале"
+        verbose_name = 'группу'
+        verbose_name_plural = 'Группы на портале'
 
     def __str__(self):
         return self.title
@@ -33,8 +33,8 @@ class Post(CreatedModel):
     )
 
     class Meta(CreatedModel.Meta):
-        verbose_name = "пост"
-        verbose_name_plural = "Посты на портале"
+        verbose_name = 'пост'
+        verbose_name_plural = 'Посты на портале'
 
 
 class Comment(CreatedModel):
@@ -47,8 +47,8 @@ class Comment(CreatedModel):
 
     class Meta(CreatedModel.Meta):
         ordering = ('-id',)
-        verbose_name = "комментарий"
-        verbose_name_plural = "Комментарии на портале"
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии на портале'
 
 
 class Follow(models.Model):
@@ -66,12 +66,13 @@ class Follow(models.Model):
     )
 
     class Meta:
-        verbose_name = "подписку"
-        verbose_name_plural = "Подписки на портале"
-        unique_together = [["user", "author"]]
+        verbose_name = 'подписку'
+        verbose_name_plural = 'Подписки на портале'
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(user=models.F("author")),
-                name="user is not author",
+                check=~models.Q(user=models.F('author')),
+                name='user is not author',
             ),
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='unique_following')
         ]
