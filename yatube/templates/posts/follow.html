@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Посты авторов, на которых подписан {{ author.get_full_name }}{% endblock %}
 {% block content %}
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}
     {% include 'posts/includes/post_card.html' %}
     {% if not forloop.last %}<hr>{% endif %}

@@ -18,7 +18,7 @@ class PostFormTests(BaseCaseForTests):
         cls.edited_form_data = {
             'text': 'Третий пост.' * 2,
             'group': cls.group_another.id,
-            #'image': cls.GIF_ANOTHER_FILE
+            'image': cls.GIF_ANOTHER_FILE
         }
 
     def test_create_post_in_database(self):
@@ -54,7 +54,7 @@ class PostFormTests(BaseCaseForTests):
         post = response.context['post']
         self.assertEqual(post.text, self.edited_form_data['text'])
         self.assertEqual(post.group.id, self.edited_form_data['group'])
-        #self.assertEqual(post.image.name, f"posts/{self.edited_form_data['image']}")
+        self.assertEqual(post.image.name, f"posts/{self.edited_form_data['image']}")
         self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, self.POST_DETAIL_URL)
 
