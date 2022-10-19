@@ -76,6 +76,7 @@ class Comment(CreatedModel):
     )
 
     class Meta:
+        ordering = ('-id',)
         verbose_name = "комментарий"
         verbose_name_plural = "Комментарии постов"
 

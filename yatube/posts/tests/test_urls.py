@@ -20,7 +20,14 @@ class URLTests(BaseCaseForTests):
             [self.POST_EDIT_URL, self.guest, 302],
             [self.POST_CREATE_URL, self.author, 200],
             [self.POST_CREATE_URL, self.guest, 302],
-            [self.UNEXISTING_PAGE, self.guest, 404]
+            [self.UNEXISTING_PAGE, self.guest, 404],
+            [self.FOLLOW_MAIN_PAGE_URL, self.guest, 302],
+            [self.FOLLOW_MAIN_PAGE_URL, self.author, 200],
+            [self.FOLLOW_URL, self.guest, 302],
+            [self.FOLLOW_URL, self.another, 200],
+            [self.FOLLOW_URL, self.author, 200],
+            [self.UNFOLLOW_URL, self.guest, 302],
+            [self.UNFOLLOW_URL, self.another, 200]
         ]
         for url, client, expected_status in status_codes:
             with self.subTest(url=url, user=get_user(client)):
@@ -32,14 +39,13 @@ class URLTests(BaseCaseForTests):
             [self.MAIN_PAGE_URL, self.guest, 'posts/index.html'],
             [self.GROUP_POSTS_URL, self.guest, 'posts/group_list.html'],
             [self.PROFILE_URL, self.guest, 'posts/profile.html'],
-            [self.POST_DETAIL_URL, self.guest,
-                'posts/post_detail.html'],
-            [self.POST_EDIT_URL, self.author,
-                'posts/create_post.html'],
-            [self.POST_CREATE_URL, self.author,
-                'posts/create_post.html'],
-            [self.UNEXISTING_PAGE, self.author,
-                'core/404.html']
+            [self.POST_DETAIL_URL, self.guest, 'posts/post_detail.html'],
+            [self.POST_EDIT_URL, self.author, 'posts/create_post.html'],
+            [self.POST_CREATE_URL, self.author, 'posts/create_post.html'],
+            [self.UNEXISTING_PAGE, self.author, 'core/404.html'],
+            [self.FOLLOW_MAIN_PAGE_URL, self.author, 'posts/follow.html'],
+            [self.FOLLOW_URL, self.another, 'posts/profile.html'],
+            [self.UNFOLLOW_URL, self.another, 'posts/profile.html']
         ]
         for url, client, expected_template in templates_bank:
             with self.subTest(address=url):
@@ -50,7 +56,13 @@ class URLTests(BaseCaseForTests):
         self.REDIRECTS_BANK = [
             [self.POST_EDIT_URL, self.another, self.POST_DETAIL_URL],
             [self.POST_EDIT_URL, self.guest, self.POST_EDIT_URL_REDIRECT],
-            [self.POST_CREATE_URL, self.guest, self.POST_CREATE_URL_REDIRECT]
+            [self.POST_CREATE_URL, self.guest, self.POST_CREATE_URL_REDIRECT],
+            [self.POST_COMMENT, self.author, self.POST_DETAIL_URL],
+            [self.POST_COMMENT, self.guest, self.POST_COMMENT_REDIRECT],
+            [self.FOLLOW_MAIN_PAGE_URL, self.guest,
+                self.FOLLOW_MAIN_PAGE_URL_REDIRECT],
+            [self.FOLLOW_URL, self.guest, self.FOLLOW_URL_REDIRECT],
+            [self.UNFOLLOW_URL, self.guest, self.UNFOLLOW_URL_REDIRECT],
         ]
         for url, client, expected in self.REDIRECTS_BANK:
             with self.subTest(url=url, expected=expected):

@@ -10,6 +10,7 @@ class PostModelTest(BaseCaseForTests):
         """Проверяем, что у моделей корректно работает __str__."""
         self.assertEqual(self.group.title, str(self.group))
         self.assertEqual(self.post.text[0:LENGTH_TEXT], str(self.post))
+        self.assertEqual(self.comment.text[0:LENGTH_TEXT], str(self.comment))
 
     def test_models_have_correct_verboses(self):
         """Проверяем, что у моделей корректно работают verbose_name."""

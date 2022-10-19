@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Follow, Group, Post
+from posts.models import Comment, Follow, Group, Post
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -26,6 +26,17 @@ class GroupAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'post',
+        'author',
+        'text'
+    )
+    list_editable = ('text',)
+    empty_value_display = '-пусто-'
+
+
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
@@ -39,5 +50,7 @@ class FollowAdmin(admin.ModelAdmin):
 admin.site.register(Post, PostAdmin)
 
 admin.site.register(Group, GroupAdmin)
+
+admin.site.register(Comment, CommentAdmin)
 
 admin.site.register(Follow, FollowAdmin)

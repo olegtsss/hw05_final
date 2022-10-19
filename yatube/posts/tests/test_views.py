@@ -3,7 +3,7 @@ from django.core.cache import cache
 from django.test import override_settings
 from django.urls import reverse
 
-from posts.models import Comment, Follow, Post
+from posts.models import Follow, Post
 from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
 
@@ -81,48 +81,8 @@ class PostPagesTests(BaseCaseForTests):
         ).context['page_obj']
         self.assertIsNot(self.post, posts)
 
-    def test_auth_user_can_comment_post(self):
-        """
-        Проверка, что авторизованный пользователь
-        может комментировать пост
-        """
-        before_comments = set(Comment.objects.all())
-        self.another.post(
-            self.POST_COMMENT,
-            data={'text': 'Тестовый комментарий'}
-        )
-        after_comments = set(Comment.objects.all())
-        added_comments_set = after_comments - before_comments
-        self.assertEqual(len(added_comments_set), 1)
-        comment = added_comments_set.pop()
-        response_comment = self.guest.post(
-            self.POST_DETAIL_URL
-        ).context['comments'][0]
-        self.assertTrue(comment.post, response_comment.post)
-        self.assertTrue(comment.author, response_comment.author)
-        self.assertTrue(comment.text, response_comment.text)
-        self.assertTrue(comment.pub_date, response_comment.pub_date)
-
-    def test_not_auth_user_cannot_comment_post(self):
-        """
-        Проверка, что не авторизованный пользователь
-        не может комментировать пост
-        """
-        before_comments = set(Comment.objects.all())
-        self.guest.post(
-            self.POST_COMMENT,
-            data={'text': 'Тестовый комментарий'}
-        )
-        after_comments = set(Comment.objects.all())
-        added_comments_set = after_comments - before_comments
-        self.assertEqual(len(added_comments_set), 0)
-
     def test_index_page_cashe(self):
         """Проверка работы кэша для списка постов"""
-        posts = self.guest.get(
-            self.MAIN_PAGE_URL
-        ).context['page_obj'].object_list
-        self.assertIn(self.post, posts)
         page = self.guest.get(self.MAIN_PAGE_URL).content
         Post.objects.all().delete()
         self.assertEqual(

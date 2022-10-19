@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from posts.models import Comment, Group, Post, User
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -21,10 +21,13 @@ class BaseCaseForTests(TestCase):
     LOGIN_URL = reverse('users:login')
     MAIN_PAGE_URL = reverse('posts:index')
     FOLLOW_MAIN_PAGE_URL = reverse('posts:follow_index')
+    FOLLOW_MAIN_PAGE_URL_REDIRECT = f'{LOGIN_URL}?next={FOLLOW_MAIN_PAGE_URL}'
     PROFILE_URL = reverse('posts:profile', args=[NAME])
     ANOTHER_PROFILE_URL = reverse('posts:profile', args=[NAME_ANOTHER])
     FOLLOW_URL = reverse('posts:profile_follow', args=[NAME])
+    FOLLOW_URL_REDIRECT = f'{LOGIN_URL}?next={FOLLOW_URL}'
     UNFOLLOW_URL = reverse('posts:profile_unfollow', args=[NAME])
+    UNFOLLOW_URL_REDIRECT = f'{LOGIN_URL}?next={UNFOLLOW_URL}'
     POST_CREATE_URL = reverse('posts:post_create')
     POST_CREATE_URL_REDIRECT = f'{LOGIN_URL}?next={POST_CREATE_URL}'
     GROUP_POSTS_URL = reverse('posts:group_posts', args=[SLUG])
@@ -70,23 +73,27 @@ class BaseCaseForTests(TestCase):
             group=cls.group,
             image=cls.GIF_FILE
         )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text='Первый комментарий.'
+        )
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL_REDIRECT = (
             f'{cls.LOGIN_URL}?next={cls.POST_EDIT_URL}'
         )
         cls.POST_COMMENT = reverse('posts:add_comment', args=[cls.post.id])
+        cls.POST_COMMENT_REDIRECT = f'{cls.LOGIN_URL}?next={cls.POST_COMMENT}'
+        cls.guest = Client()
+        cls.author = Client()
+        cls.author.force_login(cls.user)
+        cls.another = Client()
+        cls.another.force_login(cls.user_another)
+        cls.third = Client()
+        cls.third.force_login(cls.user_third)
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
-    def setUp(self):
-        self.guest = Client()
-        self.author = Client()
-        self.author.force_login(self.user)
-        self.another = Client()
-        self.another.force_login(self.user_another)
-        self.third = Client()
-        self.third.force_login(self.user_third)
