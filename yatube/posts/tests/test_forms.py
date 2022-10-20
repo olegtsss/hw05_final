@@ -7,19 +7,6 @@ from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(BaseCaseForTests):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.form_data = {
-            'text': 'Второй пост.',
-            'group': cls.group.id,
-            'image': cls.GIF_ANOTHER_FILE
-        }
-        cls.edited_form_data = {
-            'text': 'Третий пост.' * 2,
-            'group': cls.group_another.id,
-            # 'image': cls.GIF_ANOTHER_FILE
-        }
 
     def test_create_post_in_database(self):
         """Cоздаётся новая запись в базе данных c корректными атрибутами."""
@@ -43,32 +30,38 @@ class PostFormTests(BaseCaseForTests):
         self.guest.post(
             self.POST_CREATE_URL, self.form_data, follow=True
         )
-        after_posts = set(Post.objects.all())
-        self.assertEqual(after_posts, before_posts)
+        self.assertEqual(set(Post.objects.all()), before_posts)
 
     def test_edit_post(self):
         """После редактирования происходит изменение поста."""
-        response = self.author.post(
-            self.POST_EDIT_URL, data=self.edited_form_data, follow=True
+        self.author.post(
+            self.POST_EDIT_URL, data=self.form_data, follow=True
         )
-        post = response.context['post']
-        self.assertEqual(post.text, self.edited_form_data['text'])
-        self.assertEqual(post.group.id, self.edited_form_data['group'])
-        # self.assertEqual(
-        #    post.image.name, f"posts/{self.edited_form_data['image']}"
-        # )
-        self.assertEqual(post.author, self.post.author)
-        self.assertRedirects(response, self.POST_DETAIL_URL)
+        post = Post.objects.get(id=self.post.id)
+        self.assertEqual(post.text, self.form_data['text'])
+        self.assertEqual(post.group.id, self.form_data['group'])
+        self.assertEqual(
+            post.image.name, f"posts/{self.form_data['image']}"
+        )
+        self.assertEqual(post.author, self.user)
 
     def test_not_author_cannot_edit_post(self):
         """Не автор и гость не могут отредактировать пост."""
-        self.another.post(self.POST_EDIT_URL, data=self.edited_form_data)
-        self.guest.post(self.POST_EDIT_URL, data=self.edited_form_data)
-        post = self.author.post(self.POST_DETAIL_URL).context['post']
-        self.assertEqual(post.text, self.post.text)
-        self.assertEqual(post.group.id, self.post.group.id)
-        self.assertEqual(post.image.name, self.post.image)
-        self.assertEqual(post.author, self.post.author)
+        for case in [
+            {'client': self.another,
+             'redirect': self.POST_DETAIL_URL},
+            {'client': self.guest,
+             'redirect': f'/auth/login/?next=/posts/{self.post.id}/edit/'}
+        ]:
+            response = case['client'].post(
+                self.POST_EDIT_URL, data=self.form_data
+            )
+            post = Post.objects.get(id=self.post.id)
+            self.assertEqual(post.text, self.post.text)
+            self.assertEqual(post.group.id, self.post.group.id)
+            self.assertEqual(post.image, self.post.image)
+            self.assertEqual(post.author, self.post.author)
+            self.assertRedirects(response, case['redirect'])
 
     def test_post_create_and_edit_context(self):
         """Проверка контекста для контроллера post_create и post_edit."""

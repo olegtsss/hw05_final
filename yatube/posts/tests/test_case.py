@@ -83,6 +83,11 @@ class BaseCaseForTests(TestCase):
             group=cls.group,
             image=cls.GIF_FILE
         )
+        cls.form_data = {
+            'text': 'Второй пост.',
+            'group': cls.group.id,
+            'image': cls.GIF_ANOTHER_FILE
+        }
         cls.comment = Comment.objects.create(
             post=cls.post,
             author=cls.user,

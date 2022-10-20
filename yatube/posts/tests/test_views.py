@@ -28,9 +28,9 @@ class PostPagesTests(BaseCaseForTests):
         ]
         for url in case:
             with self.subTest(address=url):
-                if url == self.FOLLOW_MAIN_PAGE_URL or url != self.POST_URL:
+                if url != self.POST_URL:
                     posts = self.another.get(url).context['page_obj']
-                    self.assertEqual(len(posts.object_list), 1)
+                    self.assertEqual(len(posts), 1)
                     post = posts[0]
                 else:
                     post = self.guest.get(url).context['post']
@@ -98,9 +98,8 @@ class PostPagesTests(BaseCaseForTests):
         """
         self.third.get(self.FOLLOW_URL)
         self.assertTrue(
-            Follow.objects.
-            filter(user=self.user_third).
-            filter(author=self.user)
+            Follow.objects.filter(
+                user=self.user_third).filter(author=self.user)
         )
 
     def test_user_can_unfollow_to_another_authors(self):
@@ -109,23 +108,8 @@ class PostPagesTests(BaseCaseForTests):
         """
         self.another.get(self.UNFOLLOW_URL)
         self.assertFalse(
-            Follow.objects.
-            filter(user=self.user_another).
-            filter(author=self.user)
-        )
-
-    def test_new_post_on_page_follower(self):
-        """На странице подписок появляется новый пост"""
-        new_post = Post.objects.create(
-            text='Второй пост.',
-            author=self.user,
-            group=self.group
-        )
-        self.assertIn(
-            new_post,
-            self.another.get(
-                self.FOLLOW_MAIN_PAGE_URL
-            ).context['page_obj'].object_list
+            Follow.objects.filter(
+                user=self.user_another).filter(author=self.user)
         )
 
     def test_another_group_without_test_post(self):
@@ -136,5 +120,5 @@ class PostPagesTests(BaseCaseForTests):
         ]
         for url in case:
             with self.subTest(address=url):
-                posts = self.third.get(url).context['page_obj'].object_list
+                posts = self.third.get(url).context['page_obj']
                 self.assertIsNot(self.post, posts)

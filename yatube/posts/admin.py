@@ -40,8 +40,8 @@ class CommentAdmin(admin.ModelAdmin):
 class FollowAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
-        'author',
-        'user'
+        'user',
+        'author'
     )
     list_editable = ('author', 'user')
     empty_value_display = '-пусто-'

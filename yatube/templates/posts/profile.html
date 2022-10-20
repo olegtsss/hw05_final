@@ -9,12 +9,12 @@
       Все посты пользователя
       {{ author.get_full_name }}
     </h1>
-    <h6>Всего постов: {{ page_obj.paginator.count }},
-      всего подписок: {{ all_following }},
-      всего подписчиков: {{ all_follower }},
-      всего комментариев: {{ all_comments }}
+    <h6>Всего постов: {{ author.posts.count }},
+      всего подписок: {{ author.follower.all.count }},
+      всего подписчиков: {{ author.following.all.count }},
+      всего комментариев: {{ author.comments.all.count }}
     </h6>
-    {% if following %}
+    {% if user.is_authenticated and author != user and follow %}
       <a class="btn btn-lg btn-light"
          href="{% url 'posts:profile_unfollow' author.username %}"
          role="button">Отписаться

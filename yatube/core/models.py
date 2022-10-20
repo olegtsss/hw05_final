@@ -19,7 +19,7 @@ class CreatedModel(models.Model):
     )
     author = models.ForeignKey(
         User,
-        related_name='%(app_label)s_%(class)s_related',
+        related_name='%(class)ss',
         on_delete=models.CASCADE,
         verbose_name='Автор'
     )
@@ -29,4 +29,7 @@ class CreatedModel(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[0:LENGTH_TEXT]
+        text = self.text[0:LENGTH_TEXT]
+        author = self.author.username
+        pub_date = self.pub_date.strftime('%Y:%m:%d')
+        return f'{[text, author, pub_date]}'

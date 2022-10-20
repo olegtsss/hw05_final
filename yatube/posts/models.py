@@ -46,7 +46,6 @@ class Comment(CreatedModel):
     )
 
     class Meta(CreatedModel.Meta):
-        ordering = ('-id',)
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии на портале'
 
@@ -62,7 +61,7 @@ class Follow(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='following',
-        verbose_name='Подписан'
+        verbose_name='Подписан на автора'
     )
 
     class Meta:
@@ -76,3 +75,6 @@ class Follow(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'author'], name='unique_following')
         ]
+
+    def __str__(self):
+        return f'{[self.user, self.author]}'

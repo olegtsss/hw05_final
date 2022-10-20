@@ -24,10 +24,9 @@ class URLTests(BaseCaseForTests):
             [self.FOLLOW_MAIN_PAGE_URL, self.guest, 302],
             [self.FOLLOW_MAIN_PAGE_URL, self.author, 200],
             [self.FOLLOW_URL, self.guest, 302],
-            [self.FOLLOW_URL, self.another, 200],
-            [self.FOLLOW_URL, self.author, 200],
+            [self.FOLLOW_URL, self.author, 302],
             [self.UNFOLLOW_URL, self.guest, 302],
-            [self.UNFOLLOW_URL, self.another, 200]
+            [self.UNFOLLOW_URL, self.author, 404]
         ]
         for url, client, expected_status in status_codes:
             with self.subTest(url=url, user=get_user(client)):
@@ -44,8 +43,6 @@ class URLTests(BaseCaseForTests):
             [self.POST_CREATE_URL, self.author, 'posts/create_post.html'],
             [self.UNEXISTING_PAGE, self.author, 'core/404.html'],
             [self.FOLLOW_MAIN_PAGE_URL, self.author, 'posts/follow.html'],
-            [self.FOLLOW_URL, self.another, 'posts/profile.html'],
-            [self.UNFOLLOW_URL, self.another, 'posts/profile.html']
         ]
         for url, client, expected_template in templates_bank:
             with self.subTest(address=url):
@@ -69,3 +66,7 @@ class URLTests(BaseCaseForTests):
                 self.assertRedirects(
                     client.get(url, follow=True), expected
                 )
+        response = self.author.post(
+            self.POST_EDIT_URL, data=self.form_data, follow=True
+        )
+        self.assertRedirects(response, self.POST_DETAIL_URL)

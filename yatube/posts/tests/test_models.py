@@ -1,7 +1,7 @@
 from core.models import LENGTH_TEXT
 from django.test import override_settings
 
-from posts.models import Post
+from posts.models import Follow, Post
 from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
 
@@ -10,8 +10,15 @@ class PostModelTest(BaseCaseForTests):
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         self.assertEqual(self.group.title, str(self.group))
-        self.assertEqual(self.post.text[0:LENGTH_TEXT], str(self.post))
-        self.assertEqual(self.comment.text[0:LENGTH_TEXT], str(self.comment))
+        for model in [self.post, self.comment]:
+            text = model.text[0:LENGTH_TEXT]
+            author = model.author.username
+            pub_date = model.pub_date.strftime('%Y:%m:%d')
+            self.assertEqual(f'{[text, author, pub_date]}', str(model))
+        follow = Follow.objects.create(
+            user=self.user, author=self.user_another
+        )
+        self.assertEqual(str(follow), f'{[self.user, self.user_another]}')
 
     def test_models_have_correct_verboses(self):
         """Проверяем, что у моделей корректно работают verbose_name."""
