@@ -144,8 +144,8 @@ dmypy.json
 .history/
 
 .mypy_cache
-#yatube/static/css
-#yatube/static/js
-#yatube/static/img
+yatube/static/css
+yatube/static/js
+yatube/static/img
 yatube/sent_emails
 yatube/media

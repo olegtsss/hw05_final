@@ -1,4 +1,5 @@
 from django import forms
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 
 from posts.models import Comment, Post
@@ -34,16 +35,18 @@ class PostFormTests(BaseCaseForTests):
 
     def test_edit_post(self):
         """После редактирования происходит изменение поста."""
+        self.form_data['image'] = SimpleUploadedFile(
+            name='new_name.gif', content=self.GIF, content_type='image/gif'
+        )
         self.author.post(
             self.POST_EDIT_URL, data=self.form_data, follow=True
         )
         post = Post.objects.get(id=self.post.id)
-        # ПОПРОСИЛ ПОМОЩИ У НАСТАВНИКОВ ПО ЗАКОММЕНТИРОВАННОМУ КОДУ
-        # self.assertEqual(post.text, self.form_data['text'])
+        self.assertEqual(post.text, self.form_data['text'])
         self.assertEqual(post.group.id, self.form_data['group'])
-        # self.assertEqual(
-        #    post.image.name, f"posts/{self.form_data['image']}"
-        # )
+        self.assertEqual(
+            post.image.name, f"posts/{self.form_data['image']}"
+        )
         self.assertEqual(post.author, self.user)
 
     def test_not_author_cannot_edit_post(self):
