@@ -43,7 +43,7 @@ class BaseCaseForTests(TestCase):
         b'\x02\x00\x01\x00\x00\x02\x02\x0C'
         b'\x0A\x00\x3B'
     )
-    
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
