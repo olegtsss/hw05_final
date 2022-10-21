@@ -19,7 +19,7 @@ class PostModelTest(BaseCaseForTests):
             user=self.user, author=self.user_another
         )
         self.assertEqual(
-            str(follow), f'{self.user.username, self.user_another.username}'
+            str(follow), f'{self.user.username}, {self.user_another.username}'
         )
 
     def test_models_have_correct_verboses(self):

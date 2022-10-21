@@ -12,61 +12,78 @@ class PostFormTests(BaseCaseForTests):
     def test_create_post_in_database(self):
         """Cоздаётся новая запись в базе данных c корректными атрибутами."""
         before_posts = set(Post.objects.all())
-        response = self.author.post(self.POST_CREATE_URL, {
+        form_data = {
             'text': 'Второй пост.',
             'group': self.group.id,
             'image': self.GIF_ANOTHER_FILE
-        }, follow=True)
+        }
+        response = self.author.post(
+            self.POST_CREATE_URL, form_data, follow=True
+        )
         after_posts = set(Post.objects.all())
         added_posts_set = after_posts - before_posts
         self.assertEqual(len(added_posts_set), 1)
         self.assertRedirects(response, self.PROFILE_URL)
         post = added_posts_set.pop()
         self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group.id, self.form_data['group'])
-        self.assertEqual(post.text, self.form_data['text'])
-        self.assertEqual(post.image.name, f"posts/{self.form_data['image']}")
+        self.assertEqual(post.group.id, form_data['group'])
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(
+            post.image.name,
+            f"{Post.image.field.upload_to}{form_data['image']}"
+        )
 
     def test_guest_cannot_create_post(self):
         """Гость не может создать пост."""
+        form_data = {
+            'text': 'Второй пост.',
+            'group': self.group.id,
+            'image': self.GIF_ANOTHER_FILE
+        }
         before_posts = set(Post.objects.all())
         self.guest.post(
-            self.POST_CREATE_URL, self.form_data, follow=True
+            self.POST_CREATE_URL, form_data, follow=True
         )
         self.assertEqual(set(Post.objects.all()), before_posts)
 
     def test_edit_post(self):
         """После редактирования происходит изменение поста."""
         new_name_picture = 'new.gif'
-        response = self.author.post(self.POST_EDIT_URL, {
+        form_data = {
             'text': 'Второй пост.',
-            'group': self.group.id,
+            'group': self.group_another.id,
             'image': SimpleUploadedFile(
                 name=new_name_picture,
                 content=self.GIF, content_type='image/gif')
-        }, follow=True)
+        }
+        response = self.author.post(self.POST_EDIT_URL, form_data, follow=True)
         post = Post.objects.get(id=self.post.id)
-        self.assertEqual(post.text, self.form_data['text'])
-        self.assertEqual(post.group.id, self.form_data['group'])
-        self.assertEqual(post.image.name, f'posts/{new_name_picture}')
+        self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.group.id, form_data['group'])
+        self.assertEqual(
+            post.image.name, f'{Post.image.field.upload_to}{new_name_picture}'
+        )
         self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, self.POST_DETAIL_URL)
 
     def test_not_author_cannot_edit_post(self):
         """Не автор и гость не могут отредактировать пост."""
-        for case in [
+        form_data = {
+            'text': 'Второй пост.',
+            'group': self.group.id,
+            'image': self.GIF_ANOTHER_FILE
+        }
+        for client, url in [
             [self.another, self.POST_DETAIL_URL],
             [self.guest, self.POST_EDIT_URL_REDIRECT]
         ]:
-            response = case[0].post(
-                self.POST_EDIT_URL, data=self.form_data
-            )
+            response = client.post(self.POST_EDIT_URL, data=form_data)
             post = Post.objects.get(id=self.post.id)
             self.assertEqual(post.text, self.post.text)
             self.assertEqual(post.group.id, self.post.group.id)
             self.assertEqual(post.image, self.post.image)
             self.assertEqual(post.author, self.post.author)
-            self.assertRedirects(response, case[1])
+            self.assertRedirects(response, url)
 
     def test_post_create_and_edit_context(self):
         """Проверка контекста для контроллера post_create и post_edit."""

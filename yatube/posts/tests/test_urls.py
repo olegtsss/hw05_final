@@ -56,15 +56,16 @@ class URLTests(BaseCaseForTests):
             [self.POST_EDIT_URL, self.another, self.POST_DETAIL_URL],
             [self.POST_EDIT_URL, self.guest, self.POST_EDIT_URL_REDIRECT],
             [self.POST_CREATE_URL, self.guest, self.POST_CREATE_URL_REDIRECT],
-            [self.POST_COMMENT, self.author, self.POST_DETAIL_URL],
-            [self.POST_COMMENT, self.guest, self.POST_COMMENT_REDIRECT],
             [self.FOLLOW_MAIN_PAGE_URL, self.guest,
                 self.FOLLOW_MAIN_PAGE_URL_REDIRECT],
             [self.FOLLOW_URL, self.guest, self.FOLLOW_URL_REDIRECT],
+            [self.FOLLOW_URL, self.author, self.PROFILE_URL],
+            [self.FOLLOW_URL, self.third, self.PROFILE_URL],
             [self.UNFOLLOW_URL, self.guest, self.UNFOLLOW_URL_REDIRECT],
+            [self.UNFOLLOW_URL, self.third, self.PROFILE_URL]
         ]
         for url, client, expected in self.REDIRECTS_BANK:
-            with self.subTest(url=url, expected=expected):
+            with self.subTest(url=url, client=client, expected=expected):
                 self.assertRedirects(
                     client.get(url, follow=True), expected
                 )

@@ -75,11 +75,6 @@ class BaseCaseForTests(TestCase):
             group=cls.group,
             image=cls.GIF_FILE
         )
-        cls.form_data = {
-            'text': 'Второй пост.',
-            'group': cls.group.id,
-            'image': cls.GIF_ANOTHER_FILE
-        }
         cls.comment = Comment.objects.create(
             post=cls.post,
             author=cls.user,
@@ -91,7 +86,6 @@ class BaseCaseForTests(TestCase):
             f'{cls.LOGIN_URL}?next={cls.POST_EDIT_URL}'
         )
         cls.POST_COMMENT = reverse('posts:add_comment', args=[cls.post.id])
-        cls.POST_COMMENT_REDIRECT = f'{cls.LOGIN_URL}?next={cls.POST_COMMENT}'
         cls.guest = Client()
         cls.author = Client()
         cls.author.force_login(cls.user)
