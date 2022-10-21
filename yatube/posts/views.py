@@ -31,11 +31,11 @@ def profile(request, username):
         'author': profile_user,
         'page_obj': paginator_render_page(
             profile_user.posts.select_related('group').all(), request),
-        'following': request.user.is_authenticated
-        and request.user != profile_user
-        and Follow.objects.filter(
-            user=request.user, author=profile_user.id
-        ).exists()
+        'following':
+            request.user.is_authenticated
+            and request.user != profile_user
+            and Follow.objects.filter(
+                user=request.user, author=profile_user.id).exists()
     })
 
 
