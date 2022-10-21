@@ -99,7 +99,7 @@ class PostPagesTests(BaseCaseForTests):
         self.third.get(self.FOLLOW_URL)
         self.assertTrue(
             Follow.objects.filter(
-                user=self.user_third).filter(author=self.user)
+                user=self.user_third, author=self.user)
         )
 
     def test_user_can_unfollow_to_another_authors(self):
@@ -109,7 +109,7 @@ class PostPagesTests(BaseCaseForTests):
         self.another.get(self.UNFOLLOW_URL)
         self.assertFalse(
             Follow.objects.filter(
-                user=self.user_another).filter(author=self.user)
+                user=self.user_another, author=self.user)
         )
 
     def test_another_group_without_test_post(self):

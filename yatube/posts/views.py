@@ -27,16 +27,18 @@ def group_posts(request, slug):
 
 def profile(request, username):
     profile_user = get_object_or_404(User, username=username)
-    follow = True if request.user.is_authenticated and Follow.objects.filter(
-        user=request.user, author=profile_user.id).exists() else False
-    return render(request, 'posts/profile.html', {
+    context = {
         'author': profile_user,
         'page_obj': paginator_render_page(
-            profile_user.
-            posts.select_related('group').all(), request
-        ),
-        'follow': follow
-    })
+            profile_user.posts.select_related('group').all(), request
+        )
+    }
+    if (request.user.is_authenticated
+       and request.user != profile_user
+       and Follow.objects.filter(
+           user=request.user, author=profile_user.id).exists()):
+        context['follow'] = True
+    return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
@@ -101,7 +103,7 @@ def profile_follow(request, username):
     profile_user = get_object_or_404(User, username=username)
     if (request.user != profile_user
         and not Follow.objects.filter(
-            user=request.user).filter(author=profile_user).exists()):
+            user=request.user, author=profile_user).exists()):
         Follow.objects.create(user=request.user, author=profile_user)
     return redirect('posts:profile', username)
 

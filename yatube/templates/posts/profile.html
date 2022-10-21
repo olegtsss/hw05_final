@@ -14,7 +14,7 @@
       всего подписчиков: {{ author.following.all.count }},
       всего комментариев: {{ author.comments.all.count }}
     </h6>
-    {% if user.is_authenticated and author != user and follow %}
+    {% if follow %}
       <a class="btn btn-lg btn-light"
          href="{% url 'posts:profile_unfollow' author.username %}"
          role="button">Отписаться

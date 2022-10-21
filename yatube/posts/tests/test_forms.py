@@ -12,18 +12,20 @@ class PostFormTests(BaseCaseForTests):
     def test_create_post_in_database(self):
         """Cоздаётся новая запись в базе данных c корректными атрибутами."""
         before_posts = set(Post.objects.all())
-        response = self.author.post(
-            self.POST_CREATE_URL, self.form_data, follow=True
-        )
+        response = self.author.post(self.POST_CREATE_URL, {
+            'text': 'Второй пост.',
+            'group': self.group.id,
+            'image': self.GIF_ANOTHER_FILE
+        }, follow=True)
         after_posts = set(Post.objects.all())
         added_posts_set = after_posts - before_posts
         self.assertEqual(len(added_posts_set), 1)
         self.assertRedirects(response, self.PROFILE_URL)
         post = added_posts_set.pop()
-        self.assertTrue(post.author, self.user)
-        self.assertTrue(post.group.id, self.form_data['group'])
-        self.assertTrue(post.text, self.form_data['text'])
-        self.assertTrue(post.image, self.form_data['image'])
+        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.group.id, self.form_data['group'])
+        self.assertEqual(post.text, self.form_data['text'])
+        self.assertEqual(post.image.name, f"posts/{self.form_data['image']}")
 
     def test_guest_cannot_create_post(self):
         """Гость не может создать пост."""
@@ -35,29 +37,28 @@ class PostFormTests(BaseCaseForTests):
 
     def test_edit_post(self):
         """После редактирования происходит изменение поста."""
-        self.form_data['image'] = SimpleUploadedFile(
-            name='new_name.gif', content=self.GIF, content_type='image/gif'
-        )
-        self.author.post(
-            self.POST_EDIT_URL, data=self.form_data, follow=True
-        )
+        new_name_picture = 'new.gif'
+        response = self.author.post(self.POST_EDIT_URL, {
+            'text': 'Второй пост.',
+            'group': self.group.id,
+            'image': SimpleUploadedFile(
+                name=new_name_picture,
+                content=self.GIF, content_type='image/gif')
+        }, follow=True)
         post = Post.objects.get(id=self.post.id)
         self.assertEqual(post.text, self.form_data['text'])
         self.assertEqual(post.group.id, self.form_data['group'])
-        self.assertEqual(
-            post.image.name, f"posts/{self.form_data['image']}"
-        )
-        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.image.name, f'posts/{new_name_picture}')
+        self.assertEqual(post.author, self.post.author)
+        self.assertRedirects(response, self.POST_DETAIL_URL)
 
     def test_not_author_cannot_edit_post(self):
         """Не автор и гость не могут отредактировать пост."""
         for case in [
-            {'client': self.another,
-             'redirect': self.POST_DETAIL_URL},
-            {'client': self.guest,
-             'redirect': f'/auth/login/?next=/posts/{self.post.id}/edit/'}
+            [self.another, self.POST_DETAIL_URL],
+            [self.guest, self.POST_EDIT_URL_REDIRECT]
         ]:
-            response = case['client'].post(
+            response = case[0].post(
                 self.POST_EDIT_URL, data=self.form_data
             )
             post = Post.objects.get(id=self.post.id)
@@ -65,7 +66,7 @@ class PostFormTests(BaseCaseForTests):
             self.assertEqual(post.group.id, self.post.group.id)
             self.assertEqual(post.image, self.post.image)
             self.assertEqual(post.author, self.post.author)
-            self.assertRedirects(response, case['redirect'])
+            self.assertRedirects(response, case[1])
 
     def test_post_create_and_edit_context(self):
         """Проверка контекста для контроллера post_create и post_edit."""

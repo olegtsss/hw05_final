@@ -32,4 +32,4 @@ class CreatedModel(models.Model):
         text = self.text[0:LENGTH_TEXT]
         author = self.author.username
         pub_date = self.pub_date.strftime('%Y:%m:%d')
-        return f'{[text, author, pub_date]}'
+        return f'{text}, {author}, {pub_date}'
