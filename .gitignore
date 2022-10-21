@@ -149,3 +149,4 @@ yatube/static/js
 yatube/static/img
 yatube/sent_emails
 yatube/media
+#yatube/db.sqlite3
