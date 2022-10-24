@@ -9,7 +9,7 @@ from django.urls import reverse
 
 from posts.models import Comment, Group, Post
 
-TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=f'{settings.BASE_DIR}/TEMP/')
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -88,10 +88,10 @@ class BaseCaseForTests(TestCase):
         cls.POST_COMMENT = reverse('posts:add_comment', args=[cls.post.id])
         cls.guest = Client()
         cls.author = Client()
-        cls.author.force_login(cls.user)
         cls.another = Client()
-        cls.another.force_login(cls.user_another)
         cls.third = Client()
+        cls.author.force_login(cls.user)
+        cls.another.force_login(cls.user_another)
         cls.third.force_login(cls.user_third)
 
     @classmethod

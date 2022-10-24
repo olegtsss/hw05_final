@@ -1,7 +1,6 @@
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
-
 from posts.models import Comment, Post
 from posts.tests.test_case import TEMP_MEDIA_ROOT, BaseCaseForTests
 
