@@ -65,6 +65,7 @@ python manage.py runserver
 ### Разработчики
 
 [olegtsss](https://github.com/olegtsss): backend
+
 [yandex](https://ya.ru): frontend
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
