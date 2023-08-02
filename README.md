@@ -2,15 +2,15 @@
 
 https://yatube.git.olegtsss.ru:5002
 
-# Описание проекта Yatube
+### Описание проекта Yatube
 
 Проект представляет собой социальную сеть для записей внезапных мыслей. 
 
-# Используемые технологии
+### Используемые технологии
 
 Python 3.7, Django 2.2, Django ORM, SQLite3, Paginator
 
-## Как запустить проект:
+### Как запустить проект:
 
 - Клонировать репозиторий и перейти в него в командной строке:
 
@@ -62,7 +62,7 @@ python manage.py collectstatic --no-input
 python manage.py runserver
 ```
 
-# Разработчики
+### Разработчики
 
 [olegtsss](https://github.com/olegtsss): backend
 [yandex](https://ya.ru): frontend
