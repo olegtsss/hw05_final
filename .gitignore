@@ -150,3 +150,4 @@ yatube/static/img
 yatube/sent_emails
 yatube/media
 yatube/db.sqlite3
+yatube/dump.json
